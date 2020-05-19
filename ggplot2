@@ -1,0 +1,6 @@
+Error in unpackPkgZip(foundpkgs[okp, 2L], foundpkgs[okp, 1L], lib, libs_only,  : 
+  错误：不能锁定目录‘D:\Program Files\R\R-3.6.3\library’进行修改
+尝试删除‘D:\Program Files\R\R-3.6.3\library/00LOCK’
+
+修复方法：
+   找到‘D:\Program Files\R\R-3.6.1\library/00LOCK’ 将 00LOCK文件夹删掉，重新安装就可以了
