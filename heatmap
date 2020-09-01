@@ -1,0 +1,83 @@
+ #孟浩巍RNA-seq处理20171203video-bilibili
+ #火山图，热图#
+ 
+ 
+ #data input form cuffdiff output#####without FPKM####
+ #x轴的取值范围#
+ cuffdiff_result= read.table(file="file_location")
+ 
+ wt_FPKM=cuffdiff_result$value_2
+ treat_FPKM= cuffdiff_result$value_1
+ 
+ log2_foldchange = log2(treat_FPKM/wt_FPKM)
+ #但是这种处理方式会导致里面出现0的情况，无法继续运行，所以进行如下的操作#
+ #R中有一个特比好用的替换方式,使用[wt_FPKM == 0]来进行一个判断，并且将log2_foldchange中的这些判断的结果，全部赋值于0，同理处理treat#
+ 
+ log2_foldchange[wt_FPKM == 0] = 0
+ log2_foldchange[treat_FPKM == 0] = 0
+
+ 
+ #Y轴取值范围#
+ #*-1 的原因是log10之后是负值，需要正值#
+ log10_p_value = log10(cuffdiff_result$p_value) * -1
+ 
+ 
+ ######1st edition##############################################################
+ #对x轴和y轴进行limit的限制#
+ 
+ plot(x= log2_foldchange, y = log10_p_value,xlim=c(4,4),ylim=c(0.001,4))
+ 
+ #######2nd edition#####################################################################
+log10_p_value.filter = log10_p_value[log10_p_value >= 0.001]
+log2_foldchange.filter = log2_foldchange[log2_foldchange >= 0.001]
+ plot(x= log2_foldchange.filter, y = log10_p_value.filter,xlim=c(4,4),ylim=c(0,4))
+ 
+ ######3rd edition##############################################################color###############
+ 
+ plot(x= log2_foldchange.filter, y = log10_p_value.filter,xlim=c(4,4),ylim=c(0,4),
+      col=rgb(0,0,1,0.3),pch=16 
+       )
+##############4th edition##############################################################color change########
+length(log2_foldchange.filter)#用于计算一共有多少个数量值，用于下面的图形的颜色的向量赋值
+col_vector = rep(rgb(0,0,1,0.1),length(log2_foldchange.filter))#设置一个循环rep，重复给这个颜色向量赋值
+col_vector[log10_p_value.filter >= -1* log10(0.01)] = rgb (1,0,0)
+
+ plot(x= log2_foldchange.filter, y = log10_p_value.filter,xlim=c(4,4),ylim=c(0,4),
+      col=col_vector,pch=16 
+       )
+	   
+	   
+##############但是判断是否能够是差异的，不止是P VALUE小于0.5，还需要，2，wt和treat的FPKM都要大于0，3.fold change需要大于2或者 小于0.5
+log2_foldchange = log2(treat_FPKM/wt_FPKM)
+
+select_sign_vector = (cuffdiff_result$value_1 >0) &(cuffdiff_result$value_2>0) &(abs(log2_foldchange)>= 1)&(cuffdiff_result$value_1 >=1 | cuffdiff_result$value_2>=1) & (cuffdiff_result$p_value<=0.05)#这里的value1和2都是FPKM的值#
+#这里的select_sign_vector才是显著的差异基因
+table(select_sign_vector)#查看显著的基因的数量
+
+
+
+###########热图绘制################
+input_matrix= matrix (c(1:36),6,6)
+
+#设置页面宽度
+x_size = dim(input_matrix)[1]
+y_size = dim(input_matrix)[2]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
