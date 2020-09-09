@@ -1,0 +1,5 @@
+#虽然使用R的时候尽量不要安装新版的，可能会存在很多bug，但是bioconductor必须要在4.0以上的版本进行运行。以下是官方给出的安装代码：
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+install.packages("BiocManager")
+BiocManager::install(version = "3.11")
