@@ -1,0 +1,31 @@
+#更换源到清华源
+source("https://bioconductor.org/biocLite.R")
+
+#安装WGCNA所需要的所有包
+#尝试如下的代码失败了，所以一个一个安装
+#source("https://bioconductor.org/biocLite.R")
+#biocLite(c("AnnotationDbi", "impute","GO.db", "preprocessCore"))
+#site="https://mirrors.tuna.tsinghua.edu.cn/CRAN"
+#install.packages(c("WGCNA", "stringr", "reshape2"), repos=site)
+#在bioconductor中搜索包的安装方式，手动安装。
+#http://www.bioconductor.org/packages/release/bioc/html/GmicR.html
+
+#首先是"AnnotationDbi", "impute","GO.db", "preprocessCore"
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("GO.db")
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("AnnotationDbi")
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("impute")
+——————————————————————————————————————————————————————————————————————————————
+#WGCNA那段的安装，使用代码成功了
+install.packages(c("WGCNA", "stringr", "reshape2"), repos=site)
