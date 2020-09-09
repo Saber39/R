@@ -26,6 +26,118 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("impute")
-——————————————————————————————————————————————————————————————————————————————
+***********************
 #WGCNA那段的安装，使用代码成功了
 install.packages(c("WGCNA", "stringr", "reshape2"), repos=site)
+——-----------------------------------开始使用---------------------------------
+—————————————————————————————————————数据读入——————————————————————————————————
+library(WGCNA)
+
+## Loading required package: dynamicTreeCut
+
+## Loading required package: fastcluster
+
+## 
+## Attaching package: 'fastcluster'
+
+## The following object is masked from 'package:stats':
+## 
+##     hclust
+
+## ==========================================================================
+## *
+## *  Package WGCNA 1.63 loaded.
+## *
+## *    Important note: It appears that your system supports multi-threading,
+## *    but it is not enabled within WGCNA in R. 
+## *    To allow multi-threading within WGCNA with all available cores, use 
+## *
+## *          allowWGCNAThreads()
+## *
+## *    within R. Use disableWGCNAThreads() to disable threading if necessary.
+## *    Alternatively, set the following environment variable on your system:
+## *
+## *          ALLOW_WGCNA_THREADS=<number_of_processors>
+## *
+## *    for example 
+## *
+## *          ALLOW_WGCNA_THREADS=48
+## *
+## *    To set the environment variable in linux bash shell, type 
+## *
+## *           export ALLOW_WGCNA_THREADS=48
+## *
+## *     before running R. Other operating systems or shells will
+## *     have a similar command to achieve the same aim.
+## *
+## ==========================================================================
+
+## 
+## Attaching package: 'WGCNA'
+
+## The following object is masked from 'package:stats':
+## 
+##     cor
+
+library(reshape2)
+library(stringr)
+
+# 
+options(stringsAsFactors = FALSE)
+# 打开多线程
+enableWGCNAThreads()
+
+## Allowing parallel execution with up to 47 working processes.
+
+# 常规表达矩阵，log2转换后或
+# Deseq2的varianceStabilizingTransformation转换的数据
+# 如果有批次效应，需要事先移除，可使用removeBatchEffect
+# 如果有系统偏移(可用boxplot查看基因表达分布是否一致)，
+# 需要quantile normalization
+
+exprMat <- "WGCNA/LiverFemaleClean.txt"  #这里如果要读入指定的位置的文件，需要更改如下：exprMat <- "E:/data/WGCNAdata/LiverFemaleClean.txt"（需要注意斜杠的位置，之前报错过）
+
+
+# 官方推荐 "signed" 或 "signed hybrid"
+# 为与原文档一致，故未修改 
+type = "unsigned"
+
+# 相关性计算
+# 官方推荐 biweight mid-correlation & bicor
+# corType: pearson or bicor
+# 为与原文档一致，故未修改
+corType = "pearson"
+
+corFnc = ifelse(corType=="pearson", cor, bicor)
+# 对二元变量，如样本性状信息计算相关性时，
+# 或基因表达严重依赖于疾病状态时，需设置下面参数
+maxPOutliers = ifelse(corType=="pearson",1,0.05)
+
+# 关联样品性状的二元变量时，设置
+robustY = ifelse(corType=="pearson",T,F)
+
+##导入数据##
+dataExpr <- read.table(exprMat, sep='\t', row.names=1, header=T, 
+                     quote="", comment="", check.names=F)
+
+dim(dataExpr)
+
+## [1] 3600  134
+
+head(dataExpr)[,1:8]
+
+##                 F2_2    F2_3     F2_14    F2_15    F2_19       F2_20
+## MMT00000044 -0.01810  0.0642  6.44e-05 -0.05800  0.04830 -0.15197410
+## MMT00000046 -0.07730 -0.0297  1.12e-01 -0.05890  0.04430 -0.09380000
+## MMT00000051 -0.02260  0.0617 -1.29e-01  0.08710 -0.11500 -0.06502607
+## MMT00000076 -0.00924 -0.1450  2.87e-02 -0.04390  0.00425 -0.23610000
+## MMT00000080 -0.04870  0.0582 -4.83e-02 -0.03710  0.02510  0.08504274
+## MMT00000102  0.17600 -0.1890 -6.50e-02 -0.00846 -0.00574 -0.01807182
+##                F2_23    F2_24
+## MMT00000044 -0.00129 -0.23600
+## MMT00000046  0.09340  0.02690
+## MMT00000051  0.00249 -0.10200
+## MMT00000076 -0.06900  0.01440
+## MMT00000080  0.04450  0.00167
+## MMT00000102 -0.12500 -0.06820
+——————————————————————————————————————————————————————数据筛选————————————————————————————————————
