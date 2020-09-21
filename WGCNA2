@@ -206,12 +206,18 @@ for(module in substring(colnames(MEs),3)){
 allTraits<-read.delim('data/pheno.txt',header=T,sep="\t")  #读取表型值
 
 #去除删除的样本
-traitRows = match(SampleName, allTraits[,1]);
-datTraits = allTraits[traitRows, -1];    
+traitRows = match(SampleName, allTraits[,1]); #看下我们的trait的基因的和之前处理的sampleName的做一个比对，看下有没有被过滤掉的。allTraits的第一列
+datTraits = allTraits[traitRows, -1];    #-1是指除去第一列，其他列都读进来；除去第一列的，因为第一列是名字
 rownames(datTraits) = allTraits[traitRows, 1];
 
+##这里因为我们没有除去一些组别，所以不用去除删除的样本，直接进行计算，所以代码如下
+moduleTraitCor = cor(MEs, allTraits, use = "p") # use=p代表去掉缺失计算
+moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)#
+
+
+
 #计算ME与表型的相关系数，并计算p值
-moduleTraitCor = cor(MEs, datTraits, use = "p") # use=p代表去掉缺失计算
+moduleTraitCor = cor(MEs, allTraits, use = "p") # use=p代表去掉缺失计算
 moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)#
 
 #整理要显示在图中的数字,第一行为相关系数，第二行为p值
@@ -223,7 +229,7 @@ dim(textMatrix) = dim(moduleTraitCor)
 pdf("wgcna.Module-trait.heatmap.pdf", width = 10, height = 15)
 par(mar = c(6, 8.8, 3, 2.2))  
 labeledHeatmap(Matrix = moduleTraitCor,   #相关系数
-               xLabels = colnames(datTraits), #x轴为表型
+               xLabels = colnames(allTraits), #x轴为表型
                yLabels = names(MEs),#y轴为模块
                ySymbols = names(MEs),
                colorLabels = FALSE, 
