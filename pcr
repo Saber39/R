@@ -1,0 +1,5 @@
+一个可以直接荧光定量pcr数据的包
+
+https://www.rdocumentation.org/packages/pcr/versions/1.2.2
+# install package CRAN
+install.packages('pcr')
