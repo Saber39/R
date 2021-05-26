@@ -1,0 +1,21 @@
+# In case i earsed all packages, here are some important packages installtion codes
+install.packages('installr')
+library(installr)
+updateR()
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("clusterProfiler")
+
+install.packages('tidyverse')
+install.packages("devtools")
+install.packages("RColorBrewer")
+install.packages("pheatmap") 
+install.packages("readxl")
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("clusterProfiler")
+BiocManager::install("WGCNA")
