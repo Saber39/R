@@ -1,0 +1,34 @@
+#这个脚本的主要目的是因为实验室一个师妹被一个测蛋白组的公司给坑了。。然后人家扔给他原始数据就不管了，她没法和数据库进行比对
+#所以需要从excel中提取出来多肽的序列，并且按顺序命名，和我们的目的的库进行比对。
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("Biostrings")
+
+library(Biostrings)
+library(seqinr)
+
+library(readxl)
+test1 <- read_excel("F:/YJQ/test1.xlsx")
+View(test1)
+
+
+a <- read.csv("test1.csv",sep = ",",header = T,stringsAsFactors = F) # 注意下不要变成因子
+
+b <- a[,c("Sequence")] # 注意下变成字符串就行，不要变成数据框
+
+b <- as.list(b)
+library(Biostrings)
+library(seqinr)
+
+b <- a[,1] # 注意下变成字符串就行，不要变成数据框
+
+test2 <- as.list(b)
+
+SeqName<-1:788 #文件有多少行就写到多少数字
+write.fasta(test2, names=SeqName, file="test.fasta", open='w', nbchar=60)
+
+#这个脚本参考了简书上一个大佬的，后续补上参考链接
+#后续使用blastp -db XXX -query test.fasta -out result -outfmt 7 进行比对就行了，时间也很快
