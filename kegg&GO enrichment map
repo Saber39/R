@@ -1,0 +1,99 @@
+#包含一些关键词的筛选和调色
+library(readr)
+library(tidyverse)
+library(pheatmap)
+#install.packages("RColorBrewer")
+library(RColorBrewer)
+
+clean_N5_2P_log <- read_csv("FB_data/clean_N5_2P_log.csv")
+View(clean_N5_2P_log)
+library(readxl)
+gene_symbol_info <- read_excel("FB_data/gene_symbol_info.xlsx")
+View(gene_symbol_info)
+library(readr)
+allFPKM <- read_csv("F:/20210703/FB_data/allFPKM.csv")
+allFPKM <- allFPKM[,-(5:7)]
+allFPKM <- allFPKM[,-(8:10)]
+View(allFPKM)
+
+#合并两个表格
+dataset1 <- dplyr::left_join(gene_symbol_info, clean_N5_2P_log,by = c('GeneID'='Gene_ID')) %>%
+ filter_all(all_vars(!is.na(.)))#过滤含有na的行
+#合并全部表达量的表格
+df1 <- dplyr::left_join(dataset1,allFPKM,by = c('GeneID'='Gene_ID'))
+write_csv(df1, 'df1.csv')
+
+
+heatplot1 <- dplyr::left_join(clean_N5_2P_log,allFPKM,by = c('Gene_ID'='Gene_ID'))
+#将含有BGI——novl的行去掉，筛选表达式。
+heatplot2 <- heatplot1 %>%
+  filter_all(any_vars(str_detect(.,pattern = "LOCMI")))
+
+
+
+#绘制热图，颜色已经调好了〿
+pheatmap(log10(heatplot2[,7:12]+1),
+         scale = 'row',
+         cluster_rows = T,
+         cluster_cols = T,
+         show_rownames=F,show_colnames=T,
+         color = colorRampPalette(c("springgreen4", "white", "firebrick3"))(50))
+
+
+
+
+
+ 
+plot_test <- pheatmap(log2(plot_merge_table[,10:21]+1),cluster_cols = F,
+                      display_numbers = F,#是否显示数字
+                      fontsize_col = 15, fontsize_row = 5,#字体大小
+                      border_color = "grey",#边界颜色
+                      gaps_row = 3,gaps_col = c(3,6,9,12),#从多少列或者行开始切剿
+                      width=7,
+                      height=60,#保存文件的长和宽
+                      filename="all1.pdf")
+
+
+
+
+
+#kegg plot with ggplot2
+library(ggthemes)
+library(viridis)
+library(RColorBrewer)
+install.packages('ggthemes')
+install.packages('viridis')
+de_ekp_df_for_plot <- dplyr::arrange(de_ekp_df,qvalue)%>%
+  select_var()#qvalue arrangement
+write.csv(de_ekp_df_for_plot,"20210704test1.csv")
+
+library(readr)
+X20210704test1 <- read_csv("20210704test1.csv")
+
+
+de_ekp_df_for_plot <- X20210704test1
+keggplot1 <- ggplot(data = de_ekp_df_for_plot, mapping = aes (x= Count, y = Description, fill = qvalue_log))+
+  geom_col()+
+  scale_fill_distiller(palette = "RdYlBu")+ #use color with 使用ColorBrewer的颜色
+  theme_light() #select a theme by ggthemes
+keggplot1
+
+
+#GO plot with ggplot2
+write.csv(de_ego_df,"GO202100704.csv")
+
+
+
+library(readr)
+GO202100704 <- read_csv("GO202100704.csv")
+de_ego_df_for_plot<- GO202100704 %>%
+  dplyr::filter( qvalue_log >= 3)
+GOplot1 <- ggplot(data = de_ego_df_for_plot, mapping = aes (x= Count, y = Description, fill = qvalue_log))+
+  geom_col()+
+  scale_fill_distiller(palette = "RdYlBu")+
+ 
+  facet_grid(ONTOLOGY ~ ., scales = "free", space = "free")+ #使用分面这个功能进行分面展示，并且优化
+  theme_light()
+  #use color with 使用ColorBrewer的颜色
+ #select a theme by ggthemes
+GOplot1
